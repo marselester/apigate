@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: car-ingress
+  annotations:
+    traefik.ingress.kubernetes.io/rate-limit: |
+      extractorfunc: "request.header.X-Travel-User"
+      rateset:
+        # Allow 1 request per minute.
+        modest:
+          period: 1m
+          average: 1
+          burst: 1
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /v1/cars
+            backend:
+              serviceName: car
+              servicePort: 80

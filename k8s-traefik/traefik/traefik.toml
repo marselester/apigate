@@ -1,0 +1,7 @@
+[entryPoints]
+  [entryPoints.http]
+  address = ":80"
+
+    [entryPoints.http.auth.forward]
+    address = "http://travelauth.default/"
+    authResponseHeaders = ["X-Travel-User"]

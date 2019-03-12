@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: hotel-ingress
+  annotations:
+    traefik.ingress.kubernetes.io/rate-limit: |
+      extractorfunc: "request.header.X-Travel-User"
+      rateset:
+        # Allow 2 requests every 15 seconds.
+        modest:
+          period: 15s
+          average: 2
+          burst: 2
+spec:
+  rules:
+    - http:
+        paths:
+          - path: /v1/hotels
+            backend:
+              serviceName: hotel
+              servicePort: 80
