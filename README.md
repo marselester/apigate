@@ -8,4 +8,5 @@ This demo is based on a dummy [Traveling project](https://traveling.docs.apiary.
 where we have services to rent a car and book a hotel.
 Check out short tutorials:
 
+- [Ambassador as API Gateway](http://marselester.com/apigate-ambassador.html)
 - [Traefik as API Gateway](http://marselester.com/apigate-traefik.html)
