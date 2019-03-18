@@ -1,0 +1,83 @@
+static_resources:
+  listeners:
+    - name: http_listener
+      address:
+        socket_address:
+          address: 0.0.0.0
+          port_value: 10000
+      filter_chains:
+        - filters:
+            - name: envoy.http_connection_manager
+              config:
+                stat_prefix: traveling_ingress
+                use_remote_address: true
+                http_filters:
+                  - name: envoy.ext_authz
+                    config:
+                      http_service:
+                        server_uri:
+                          uri: "travelauth.default"
+                          cluster: travelauth_service
+                          timeout: 0.25s
+                  - name: envoy.rate_limit
+                    config:
+                      domain: apis
+                      stage: 0
+                  - name: envoy.router
+                route_config:
+                  name: local_route
+                  virtual_hosts:
+                    - name: traveling
+                      domains: ["*"]
+                      routes:
+                        - match: { prefix: "/v1/hotels" }
+                          route: { cluster: hotel_service }
+                        - match: { prefix: "/v1/cars" }
+                          route: { cluster: car_service }
+                      rate_limits:
+                        - stage: 0
+                          actions:
+                            - generic_key: { descriptor_value: "default" }
+  clusters:
+    - name: hotel_service
+      connect_timeout: 0.25s
+      type: STRICT_DNS
+      dns_lookup_family: V4_ONLY
+      lb_policy: ROUND_ROBIN
+      hosts:
+        - socket_address: { address: "hotel.default", port_value: 80 }
+    - name: car_service
+      connect_timeout: 0.25s
+      type: STRICT_DNS
+      dns_lookup_family: V4_ONLY
+      lb_policy: ROUND_ROBIN
+      hosts:
+        - socket_address: { address: "car.default", port_value: 80 }
+    - name: travelauth_service
+      connect_timeout: 0.25s
+      type: STRICT_DNS
+      dns_lookup_family: V4_ONLY
+      lb_policy: ROUND_ROBIN
+      hosts:
+        - socket_address: { address: "travelauth.default", port_value: 80 }
+    - name: travelratelimit_service
+      connect_timeout: 0.25s
+      type: STRICT_DNS
+      dns_lookup_family: V4_ONLY
+      lb_policy: ROUND_ROBIN
+      http2_protocol_options: {}
+      hosts:
+        - socket_address: { address: "travelratelimit.default", port_value: 80 }
+
+rate_limit_service:
+  grpc_service:
+    envoy_grpc:
+      cluster_name: travelratelimit_service
+    timeout: 0.25s
+
+admin:
+  access_log_path: "/dev/null"
+  address:
+    socket_address:
+      address: 0.0.0.0
+      port_value: 9901

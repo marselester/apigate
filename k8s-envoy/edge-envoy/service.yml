@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: edge-envoy
+spec:
+  selector:
+    app: envoy-gate
+  type: NodePort
+  ports:
+    - port: 80
+      name: http
+      targetPort: http
+    - port: 81
+      name: admin
+      targetPort: admin
