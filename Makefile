@@ -4,6 +4,9 @@ build_docker_auth:
 build_docker_ratelimit:
 	docker build --tag=marselester/travel-ratelimit:v1.0.0 --file=docker/ratelimit.Dockerfile .
 
+build_docker_ratelimit_v2:
+	docker build --tag=marselester/travel-ratelimit:v2.0.0 --file=docker/ratelimit_v2.Dockerfile .
+
 build_docker_hotel:
 	docker build --tag=marselester/travel-hotel:v1.0.0 --file=docker/hotel.Dockerfile .
 

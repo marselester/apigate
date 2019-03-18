@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hotel-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hotel
+  template:
+    metadata:
+      labels:
+        app: hotel
+    spec:
+      containers:
+        - name: hotel-server
+          image: marselester/travel-hotel:v1.0.0
+          ports:
+            - containerPort: 8000
+        - name: envoy
+          image: envoyproxy/envoy:latest
+          ports:
+            - name: sidecar
+              containerPort: 10000
+            - name: admin
+              containerPort: 9901
+          args:
+            - -c /etc/envoy/envoy.yaml
+          volumeMounts:
+            - name: envoy-config-volume
+              mountPath: /etc/envoy/
+      volumes:
+        - name: envoy-config-volume
+          configMap:
+            name: hotel-envoy

@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: edge-envoy-gate
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: envoy-gate
+  template:
+    metadata:
+      labels:
+        app: envoy-gate
+    spec:
+      containers:
+        - name: envoy
+          image: envoyproxy/envoy:latest
+          ports:
+            - name: http
+              containerPort: 10000
+            - name: admin
+              containerPort: 9901
+          args:
+            - -c /etc/envoy/envoy.yaml
+          volumeMounts:
+            - name: envoy-config-volume
+              mountPath: /etc/envoy/
+      volumes:
+        - name: envoy-config-volume
+          configMap:
+            name: edge-envoy
